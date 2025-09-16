@@ -167,7 +167,7 @@
         <div class="card">
           <h2>Encontre Farms Próximos</h2>
           <p>1. Selecione o mundo abaixo.</p>
-          <p>2. Cole o conteúdo do arquivo **village.txt** do mundo selecionado.</p>
+          <p>2. Clique em **Análise do Mundo** para extrair os dados do jogo.</p>
           <p>3. Clique no botão para processar e encontrar as aldeias mais próximas.</p>
           <div class="world-select-group">
               <label for="farmWorldSelect">Selecione o Mundo:</label>
@@ -176,9 +176,6 @@
                   <option value="137">Mundo 137</option>
               </select>
           </div>
-          <label>Colar dados do village.txt:<br>
-            <textarea id="villageData" rows="10"></textarea>
-          </label>
           <label>Sua Coordenada (ex: 500|500):
             <input type="text" id="minhaCoord2">
           </label>
@@ -207,21 +204,14 @@
       <section id="analise">
         <div class="card">
           <h2>Análise de Dados do Mundo</h2>
-          <p>Para usar esta ferramenta, baixe os arquivos de dados do mundo e cole-os abaixo:</p>
+          <p>Siga os passos para coletar os dados:</p>
           <ol>
-            <li><a href="https://br136.tribalwars.com.br/map/village.txt" target="_blank">village.txt</a></li>
-            <li><a href="https://br136.tribalwars.com.br/map/player.txt" target="_blank">player.txt</a></li>
-            <li><a href="https://br136.tribalwars.com.br/map/ally.txt" target="_blank">ally.txt</a></li>
+              <li>Entre no seu mundo do Tribal Wars.</li>
+              <li>Vá para **Classificação** e clique em **Aldeias**.</li>
+              <li>Vá para **Classificação** e clique em **Jogadores**.</li>
+              <li>Vá para **Classificação** e clique em **Tribos**.</li>
+              <li>Depois de visitar as 3 páginas, clique em **Processar Análise**.</li>
           </ol>
-          <label>Dados de Aldeias (village.txt):<br>
-            <textarea id="analiseVillageData" rows="5"></textarea>
-          </label>
-          <label>Dados de Jogadores (player.txt):<br>
-            <textarea id="analisePlayerData" rows="5"></textarea>
-          </label>
-          <label>Dados de Tribos (ally.txt):<br>
-            <textarea id="analiseAllyData" rows="5"></textarea>
-          </label>
           <div class="button-group" style="margin-top: 20px;">
             <button class="action" onclick="processarAnalise()">Processar Análise</button>
           </div>
@@ -233,7 +223,7 @@
         <div class="card">
           <h2>Plano de Ataque Detalhado</h2>
           <p>1. Selecione seu mundo.</p>
-          <p>2. Cole o conteúdo dos três arquivos de dados.</p>
+          <p>2. Clique em **Análise do Mundo** para extrair os dados do jogo.</p>
           <p>3. Insira sua coordenada para encontrar os alvos mais próximos e clique em "Gerar Plano de Ataque".</p>
           <div class="world-select-group">
               <label for="planoWorldSelect">Selecione o Mundo:</label>
@@ -242,15 +232,6 @@
                   <option value="137">Mundo 137</option>
               </select>
           </div>
-          <label>Dados de Aldeias (village.txt):<br>
-            <textarea id="planoVillageData" rows="5"></textarea>
-          </label>
-          <label>Dados de Jogadores (player.txt):<br>
-            <textarea id="planoPlayerData" rows="5"></textarea>
-          </label>
-          <label>Dados de Tribos (ally.txt):<br>
-            <textarea id="planoAllyData" rows="5"></textarea>
-          </label>
           <label>Sua Coordenada (ex: 500|500):
             <input type="text" id="minhaCoordPlano">
           </label>
@@ -369,20 +350,19 @@
     }
 
     function processarAnalise() {
-        // Nova lógica para obter os dados dos campos de texto
-        const analiseVillageData = document.getElementById('analiseVillageData').value;
-        const analisePlayerData = document.getElementById('analisePlayerData').value;
-        const analiseAllyData = document.getElementById('analiseAllyData').value;
+        const villageData = localStorage.getItem('tw_scraped_data_village');
+        const playerData = localStorage.getItem('tw_scraped_data_player');
+        const allyData = localStorage.getItem('tw_scraped_data_ally');
         const resultadosDiv = document.getElementById('analiseResultados');
 
-        if (!analiseVillageData || !analisePlayerData || !analiseAllyData) {
-            alert("Por favor, cole o conteúdo dos 3 arquivos para prosseguir.");
+        if (!villageData || !playerData || !allyData) {
+            resultadosDiv.innerHTML = `<p>Dados não encontrados. Visite as páginas de classificação de Aldeias, Jogadores e Tribos no jogo para coletar os dados primeiro.</p>`;
             return;
         }
 
-        const aldeiasAtuais = processarVillages(analiseVillageData);
-        const jogadoresAtuais = processarPlayers(analisePlayerData);
-        const tribosAtuais = processarAllies(analiseAllyData);
+        const aldeiasAtuais = JSON.parse(villageData);
+        const jogadoresAtuais = JSON.parse(playerData);
+        const tribosAtuais = JSON.parse(allyData);
         
         const dataKey = `analiseData`;
         const dataSalva = JSON.parse(localStorage.getItem(dataKey)) || {};
@@ -468,14 +448,14 @@
     // PLANO DE ATAQUE
     function gerarPlanoAtaque() {
         const mundo = document.getElementById('planoWorldSelect').value;
-        const villageData = document.getElementById('planoVillageData').value;
-        const playerData = document.getElementById('planoPlayerData').value;
-        const allyData = document.getElementById('planoAllyData').value;
+        const villageData = localStorage.getItem('tw_scraped_data_village');
+        const playerData = localStorage.getItem('tw_scraped_data_player');
+        const allyData = localStorage.getItem('tw_scraped_data_ally');
         const minhaCoordStr = document.getElementById('minhaCoordPlano').value;
         const planoAtaqueDiv = document.getElementById('planoAtaqueResult');
 
         if (!villageData || !playerData || !allyData || !minhaCoordStr) {
-            alert("Por favor, cole todos os dados e insira sua coordenada.");
+            alert("Por favor, visite as páginas de classificação de Aldeias, Jogadores e Tribos no jogo para coletar os dados primeiro.");
             return;
         }
 
@@ -485,9 +465,9 @@
             return;
         }
 
-        const aldeias = processarVillages(villageData);
-        const jogadores = processarPlayers(playerData);
-        const tribos = processarAllies(allyData);
+        const aldeias = JSON.parse(villageData);
+        const jogadores = JSON.parse(playerData);
+        const tribos = JSON.parse(allyData);
 
         const alvos = Object.values(aldeias).filter(a => a.jogadorID > 0 || a.jogadorID === 0);
         
@@ -510,13 +490,13 @@
             let qtdLeve = Math.ceil(recursosEstimados / tropas.leve.carga);
             if (qtdLeve < 5) qtdLeve = 5;
 
-            const nomeJogador = alvo.jogador ? alvo.jogador.nome : "Bárbara/Bônus";
-            const nomeTribo = alvo.tribo ? alvo.tribo.nome : "N/A";
+            const nomeJogador = alvo.jogador ? alvo.jogador.name : "Bárbara/Bônus";
+            const nomeTribo = alvo.tribo ? alvo.tribo.name : "N/A";
 
             htmlResult += `
                 <div>
                     ${alvo.x}|${alvo.y} | 
-                    ${alvo.nome} (${alvo.pontos} pts) | 
+                    ${alvo.name} (${alvo.points} pts) | 
                     ${nomeJogador} | 
                     ${nomeTribo} | 
                     ${qtdLeve} Cavalaria Leve | 
@@ -528,71 +508,15 @@
         planoAtaqueDiv.innerHTML = htmlResult;
         localStorage.setItem(`planoAtaqueResult-${mundo}`, htmlResult);
     }
-
-    function processarVillages(data) {
-      const aldeias = {};
-      const linhas = data.split('\n');
-      linhas.forEach(linha => {
-        const partes = linha.split('\t');
-        if (partes.length >= 6) {
-          const id = parseInt(partes[0]);
-          aldeias[id] = {
-            id: id,
-            nome: partes[1],
-            x: parseInt(partes[2]),
-            y: parseInt(partes[3]),
-            jogadorID: parseInt(partes[4]),
-            pontos: parseInt(partes[5]),
-          };
-        }
-      });
-      return aldeias;
-    }
-
-    function processarPlayers(data) {
-      const jogadores = {};
-      const linhas = data.split('\n');
-      linhas.forEach(linha => {
-        const partes = linha.split('\t');
-        if (partes.length >= 4) {
-          const id = parseInt(partes[0]);
-          jogadores[id] = {
-            id: id,
-            nome: partes[1],
-            allyID: parseInt(partes[2]),
-            pontos: parseInt(partes[3])
-          };
-        }
-      });
-      return jogadores;
-    }
-
-    function processarAllies(data) {
-      const tribos = {};
-      const linhas = data.split('\n');
-      linhas.forEach(linha => {
-        const partes = linha.split('\t');
-        if (partes.length >= 4) {
-          const id = parseInt(partes[0]);
-          tribos[id] = {
-            id: id,
-            nome: partes[1],
-            tag: partes[2],
-            membros: parseInt(partes[3]),
-          };
-        }
-      });
-      return tribos;
-    }
     
     // Funções de análise de dados
     function getTopVillages(aldeias, jogadores) {
-      const lista = Object.values(aldeias).filter(a => a.jogadorID > 0).sort((a, b) => b.pontos - a.pontos).slice(0, 50);
+      const lista = Object.values(aldeias).filter(a => a.player > 0).sort((a, b) => b.points - a.points).slice(0, 50);
       return lista.map(aldeia => ({
-        nome: aldeia.nome,
-        pontos: aldeia.pontos,
+        nome: aldeia.name,
+        pontos: aldeia.points,
         coords: `${aldeia.x}|${aldeia.y}`,
-        jogador: jogadores[aldeia.jogadorID] ? jogadores[aldeia.jogadorID].nome : 'Desconhecido'
+        jogador: jogadores[aldeia.player] ? jogadores[aldeia.player].name : 'Desconhecido'
       }));
     }
 
@@ -601,7 +525,7 @@
             let totalPontos = 0;
             return {
                 ...tribo,
-                pontos: tribo.pontos
+                pontos: tribo.points
             };
         });
         
@@ -610,10 +534,10 @@
 
 
     function getBestFarms(aldeias) {
-      const farms = Object.values(aldeias).filter(a => a.jogadorID === 0).sort((a, b) => b.pontos - a.pontos).slice(0, 50);
+      const farms = Object.values(aldeias).filter(a => a.player === 0).sort((a, b) => b.points - a.points).slice(0, 50);
       return farms.map(aldeia => ({
         tipo: 'Bárbara',
-        pontos: aldeia.pontos,
+        pontos: aldeia.points,
         coords: `${aldeia.x}|${aldeia.y}`
       }));
     }
