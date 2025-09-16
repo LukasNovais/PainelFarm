@@ -148,14 +148,23 @@
   <section id="analise">
     <div class="card">
       <h2>Análise de Dados do Mundo</h2>
-      <p>1. **Informe o mundo e clique em Analisar.**</p>
-      <p>2. Uma nova aba irá carregar os dados. Ao finalizar, ela será fechada e o resultado aparecerá aqui.</p>
-      <div class="world-select-group">
-        <label for="worldConfig">Mundo:</label>
-        <input type="number" id="worldConfig" placeholder="Ex: 136">
-      </div>
+      <p>Para usar esta ferramenta, baixe os arquivos de dados do mundo e cole-os abaixo:</p>
+      <ol>
+        <li><a href="https://br125.tribalwars.com.br/map/village.txt" target="_blank">village.txt</a></li>
+        <li><a href="https://br125.tribalwars.com.br/map/player.txt" target="_blank">player.txt</a></li>
+        <li><a href="https://br125.tribalwars.com.br/map/ally.txt" target="_blank">ally.txt</a></li>
+      </ol>
+      <label>Dados de Aldeias (village.txt):<br>
+        <textarea id="analiseVillageData" rows="5"></textarea>
+      </label>
+      <label>Dados de Jogadores (player.txt):<br>
+        <textarea id="analisePlayerData" rows="5"></textarea>
+      </label>
+      <label>Dados de Tribos (ally.txt):<br>
+        <textarea id="analiseAllyData" rows="5"></textarea>
+      </label>
       <div class="button-group" style="margin-top: 20px;">
-        <button class="action" onclick="runFullAnalysis()">Analisar o Mundo</button>
+        <button class="action" onclick="processarAnalise()">Processar Análise</button>
       </div>
       <div id="analiseResultados" style="margin-top: 15px;"></div>
     </div>
@@ -289,7 +298,8 @@
             return document.getElementById('farmWorldSelect').value;
         }
         if (id.includes('analiseResultados')) {
-            return localStorage.getItem('tw_world_number');
+            // Nova lógica para o modo manual
+            return document.getElementById('analiseWorldSelect').value;
         }
         if (id.includes('planoAtaqueResult')) {
             return document.getElementById('planoWorldSelect').value;
@@ -297,211 +307,15 @@
         return null;
     }
 
-    function runFullAnalysis() {
-        const worldNumber = document.getElementById('worldConfig').value;
-
-        if (!worldNumber || isNaN(worldNumber)) {
-            alert("Por favor, digite um número de mundo válido.");
-            return;
-        }
-
-        localStorage.setItem('tw_world_number', worldNumber);
-
-        let urlToOpen;
-        // Verifica se é um mundo de arquivo (geralmente <= 130)
-        if (worldNumber <= 130) {
-            urlToOpen = `https://www.tribalwars.com.br/archive/br${worldNumber}`;
-        } else {
-            urlToOpen = `https://br${worldNumber}.tribalwars.com.br/game.php`;
-        }
-
-        const analyticsTab = window.open(urlToOpen, '_blank');
-        
-        // Espera um pouco e processa os dados automaticamente
-        setTimeout(() => {
-          processarAnalise();
-        }, 1500); 
-    }
-    
-    // FARM
-    function calcularFarm() {
-      const meusPontosInput = document.getElementById('meusPontos').value;
-      const alvoPontosInput = document.getElementById('alvoPontos').value;
-      const minhaCoordStr = document.getElementById('minhaCoord').value;
-      const alvoCoordStr = document.getElementById('alvoCoord').value;
-      const tipoAldeia = document.getElementById('tipoAldeia').value;
-
-      if (!meusPontosInput || !alvoPontosInput || !minhaCoordStr || !alvoCoordStr) {
-        alert("Por favor, preencha todos os campos.");
-        return;
-      }
-
-      const meusPontos = parseInt(meusPontosInput);
-      const alvoPontos = parseInt(alvoPontosInput);
-      const minhaCoord = minhaCoordStr.split("|").map(Number);
-      const alvoCoord = alvoCoordStr.split("|").map(Number);
-
-      if (minhaCoord.length < 2 || isNaN(minhaCoord[0]) || isNaN(minhaCoord[1]) ||
-          alvoCoord.length < 2 || isNaN(alvoCoord[0]) || isNaN(alvoCoord[1])) {
-        alert("Coordenadas inválidas! Use o formato: 500|500");
-        return;
-      }
-
-      const distancia = Math.sqrt(Math.pow(minhaCoord[0] - alvoCoord[0], 2) + Math.pow(minhaCoord[1] - alvoCoord[1], 2));
-      const recursosEstimados = Math.floor(alvoPontos * (tipoAldeia === "bonus" ? 1.8 : 1.2));
-
-      let recomendacao = [];
-      let recursosRestantes = recursosEstimados;
-
-      const prioridadeTropas = ["leve", "pesada", "lanceiro", "espada"];
-
-      for (let key of prioridadeTropas) {
-        if (recursosRestantes <= 0) break;
-        let qtd = Math.floor(recursosRestantes / tropas[key].carga);
-        if (qtd > 0) {
-          recomendacao.push(`${qtd} ${tropas[key].nome}(s)`);
-          recursosRestantes -= qtd * tropas[key].carga;
-        }
-      }
-
-      let decisao;
-      let mensagemEstrategia = "";
-      if (tipoAldeia === "bonus") {
-        decisao = "Vale a pena atacar mesmo se estiver um pouco distante (bônus rende mais recursos).";
-      } else {
-        if (recursosEstimados < 500) {
-          decisao = "Os recursos desta aldeia estão baixos.";
-          mensagemEstrategia = `
-            <p><b>Estratégia para recursos baixos:</b></p>
-            <ul>
-              <li>Use catapultas para demolir o Edifício Principal da aldeia, isso forçará ela a subir o nível das minas de recursos.</li>
-              <li>Enquanto isso, expanda seu raio de farm para aldeias mais distantes ou alvos com maior pontuação.</li>
-              <li>Considere usar tropas mais rápidas, como Cavalaria Leve, para realizar mais ataques em menos tempo.</li>
-            </ul>
-          `;
-        } else if (distancia <= 10) {
-          decisao = "Compensa atacar porque está próxima (mais ciclos de farm por hora).";
-        } else {
-          decisao = "Só compensa se você tiver tropas sobrando. Priorize bárbaras próximas primeiro.";
-        }
-      }
-
-      const resultadoHTML = `
-        <h3>Resultado</h3>
-        <p><b>Distância:</b> ${distancia.toFixed(2)} campos</p>
-        <p><b>Recursos estimados:</b> ${recursosEstimados}</p>
-        <p><b>Composição sugerida:</b><br>${recomendacao.join("<br>")}</p>
-        <p><b>Decisão estratégica:</b> ${decisao}</p>
-        ${mensagemEstrategia}
-      `;
-      document.getElementById('farmResult').innerHTML = resultadoHTML;
-      salvarResultado('farmResult', resultadoHTML);
-    }
-    
-    // ENCONTRAR FARMS PRÓXIMOS (RESTAURADA)
-    function encontrarFarmsProximos() {
-      const mundo = document.getElementById('farmWorldSelect').value;
-      const villageData = document.getElementById('villageData').value;
-      const minhaCoordStr = document.getElementById('minhaCoord2').value;
-      const proximosResultDiv = document.getElementById('proximosResult');
-      
-      if (!villageData || !minhaCoordStr) {
-        alert("Por favor, cole os dados das aldeias e informe suas coordenadas.");
-        return;
-      }
-      
-      const minhaCoord = minhaCoordStr.split("|").map(Number);
-      if (minhaCoord.length !== 2 || isNaN(minhaCoord[0]) || isNaN(minhaCoord[1])) {
-        alert("Coordenada inválida! Use o formato: 500|500");
-        return;
-      }
-      
-      const linhas = villageData.split('\n');
-      const aldeias = [];
-      
-      linhas.forEach(linha => {
-        const partes = linha.split(',');
-        if (partes.length >= 6) {
-          const x = parseInt(partes[2]);
-          const y = parseInt(partes[3]);
-          const pontos = parseInt(partes[5]);
-          const jogadorID = parseInt(partes[4]);
-          if (jogadorID === 0) {
-            const distancia = Math.sqrt(Math.pow(minhaCoord[0] - x, 2) + Math.pow(minhaCoord[1] - y, 2));
-            aldeias.push({
-              coords: `${x}|${y}`,
-              pontos: pontos,
-              distancia: distancia,
-              tipo: 'Bárbara'
-            });
-          }
-        }
-      });
-      
-      const aldeiasProximas = aldeias.sort((a, b) => a.distancia - b.distancia).slice(0, 50);
-
-      let htmlResult = "<h3>50 Aldeias Bárbaras mais Próximas</h3><ul>";
-      aldeiasProximas.forEach(aldeia => {
-        htmlResult += `<li>**Coord: ${aldeia.coords}** | Pontos: ${aldeia.pontos} | Distância: ${aldeia.distancia.toFixed(2)} campos</li>`;
-      });
-      htmlResult += "</ul>";
-      
-      proximosResultDiv.innerHTML = htmlResult;
-      salvarResultado('proximosResult', htmlResult);
-    }
-
-    // TREINADOR ESTRATÉGICO
-    function gerarGuiaTreinamento() {
-      const meusPontosInput = document.getElementById('estratMeusPontos').value;
-      const guiaDiv = document.getElementById('guiaTreinamento');
-
-      if (!meusPontosInput) {
-        alert("Por favor, informe sua pontuação para gerar o guia.");
-        return;
-      }
-
-      const pontos = parseInt(meusPontosInput);
-      let guia;
-
-      if (pontos < 500) {
-        guia = guias.iniciante;
-      } else if (pontos < 1000) {
-        guia = guias.basico;
-      } else if (pontos < 4000) {
-        guia = guias.intermediario;
-      } else {
-        guia = guias.avancado;
-      }
-
-      const planoList = guia.planoEvolucao.map(item => `<li>${item}</li>`).join('');
-
-      const resultadoHTML = `
-        <h3>${guia.titulo}</h3>
-        <p><b>Sua estratégia agora:</b> ${guia.estrategia}</p>
-        <p><b>Tropas de Defesa recomendadas:</b> ${guia.tropasDefesa}</p>
-        <p><b>Tropas de Ataque recomendadas:</b> ${guia.tropasAtaque}</p>
-        <h4>Plano de Evolução:</h4>
-        <ul>${planoList}</ul>
-      `;
-      guiaDiv.innerHTML = resultadoHTML;
-      guiaDiv.style.display = 'block';
-      salvarResultado('guiaTreinamento', resultadoHTML);
-    }
-
-    // ANÁLISE DO MUNDO
     function processarAnalise() {
-        const mundo = localStorage.getItem('tw_world_number');
-        const analiseVillageData = localStorage.getItem('tw_export_data_village');
-        const analisePlayerData = localStorage.getItem('tw_export_data_player');
-        const analiseAllyData = localStorage.getItem('tw_export_data_ally');
+        // Nova lógica para obter os dados dos campos de texto
+        const analiseVillageData = document.getElementById('analiseVillageData').value;
+        const analisePlayerData = document.getElementById('analisePlayerData').value;
+        const analiseAllyData = document.getElementById('analiseAllyData').value;
         const resultadosDiv = document.getElementById('analiseResultados');
 
-        if (!mundo) {
-            alert("Por favor, configure o número do mundo e clique em 'Analisar o Mundo'.");
-            return;
-        }
         if (!analiseVillageData || !analisePlayerData || !analiseAllyData) {
-            alert("Dados não encontrados. Clique em 'Analisar o Mundo' para carregar a informação.");
+            alert("Por favor, cole o conteúdo dos 3 arquivos para prosseguir.");
             return;
         }
 
@@ -509,7 +323,7 @@
         const jogadoresAtuais = processarPlayers(analisePlayerData);
         const tribosAtuais = processarAllies(analiseAllyData);
         
-        const dataKey = `analiseData-${mundo}`;
+        const dataKey = `analiseData`;
         const dataSalva = JSON.parse(localStorage.getItem(dataKey)) || {};
 
         let resultadosHtml = "<h3>Relatório de Análise</h3>";
@@ -587,7 +401,7 @@
         `;
 
         resultadosDiv.innerHTML = resultadosHtml;
-        localStorage.setItem(`analiseResultados-${mundo}`, resultadosHtml);
+        localStorage.setItem(`analiseResultados`, resultadosHtml);
     }
 
     // PLANO DE ATAQUE
@@ -744,10 +558,7 @@
     }
     
     window.onload = () => {
-        const savedWorld = localStorage.getItem('tw_world_number');
-        if (savedWorld) {
-            document.getElementById('worldConfig').value = savedWorld;
-        }
+        // Nada mais é necessário para o modo manual
     };
   </script>
 </body>
