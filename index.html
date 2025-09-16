@@ -68,7 +68,7 @@
 
   <header>
     <h1>Dashboard Tribal Wars</h1>
-    <p>Farm, Estratégia e Evolução</p>
+    <p>Ferramenta de estratégia e planejamento</p>
   </header>
 
   <nav>
@@ -148,28 +148,14 @@
   <section id="analise">
     <div class="card">
       <h2>Análise de Dados do Mundo</h2>
-      <p>1. Selecione o mundo abaixo.</p>
-      <p>2. Copie o conteúdo dos arquivos **.txt** do mundo selecionado.</p>
-      <p>3. Cole no campo correspondente e clique em processar.</p>
+      <p>1. **Informe o mundo e clique em Analisar.**</p>
+      <p>2. Uma nova aba irá carregar os dados. Ao finalizar, ela será fechada e o resultado aparecerá aqui.</p>
       <div class="world-select-group">
-          <label for="analiseWorldSelect">Selecione o Mundo:</label>
-          <select id="analiseWorldSelect">
-              <option value="136">Mundo 136</option>
-              <option value="137">Mundo 137</option>
-          </select>
+        <label for="worldConfig">Mundo:</label>
+        <input type="number" id="worldConfig" placeholder="Ex: 136">
       </div>
-      <label>Dados de Aldeias (village.txt):<br>
-        <textarea id="analiseVillageData" rows="5"></textarea>
-      </label>
-      <label>Dados de Jogadores (player.txt):<br>
-        <textarea id="analisePlayerData" rows="5"></textarea>
-      </label>
-      <label>Dados de Tribos (ally.txt):<br>
-        <textarea id="analiseAllyData" rows="5"></textarea>
-      </label>
-      <div class="button-group">
-        <button class="action" onclick="processarAnalise()">Processar Dados</button>
-        <button class="action" onclick="limparResultado('analiseResultados')">Limpar</button>
+      <div class="button-group" style="margin-top: 20px;">
+        <button class="action" onclick="runFullAnalysis()">Analisar o Mundo</button>
       </div>
       <div id="analiseResultados" style="margin-top: 15px;"></div>
     </div>
@@ -273,14 +259,6 @@
       document.querySelectorAll("nav button").forEach(btn => btn.classList.remove("active"));
       document.getElementById(tabId).classList.add("active");
       document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add("active");
-      
-      if (tabId === 'farm') {
-        carregarResultados('farmWorldSelect', 'proximosResult');
-      } else if (tabId === 'analise') {
-        carregarResultados('analiseWorldSelect', 'analiseResultados');
-      } else if (tabId === 'plano') {
-        carregarResultados('planoWorldSelect', 'planoAtaqueResult');
-      }
     }
 
     function salvarResultado(id, conteudo) {
@@ -295,21 +273,6 @@
       localStorage.setItem(`${id}-${mundo}`, JSON.stringify(dados));
     }
 
-    function carregarResultados(selectId, resultId) {
-      const mundo = document.getElementById(selectId).value;
-      if (!mundo) return;
-      
-      const elemento = document.getElementById(resultId);
-      if (elemento) {
-        const conteudoSalvo = localStorage.getItem(`${resultId}-${mundo}`);
-        if (conteudoSalvo) {
-          elemento.innerHTML = conteudoSalvo;
-        } else {
-          elemento.innerHTML = '';
-        }
-      }
-    }
-    
     function limparResultado(id) {
         const mundo = getMundoAtual(id);
         if (!mundo) return;
@@ -326,7 +289,7 @@
             return document.getElementById('farmWorldSelect').value;
         }
         if (id.includes('analiseResultados')) {
-            return document.getElementById('analiseWorldSelect').value;
+            return localStorage.getItem('tw_world_number');
         }
         if (id.includes('planoAtaqueResult')) {
             return document.getElementById('planoWorldSelect').value;
@@ -334,6 +297,24 @@
         return null;
     }
 
+    function runFullAnalysis() {
+        const worldNumber = document.getElementById('worldConfig').value;
+
+        if (!worldNumber || isNaN(worldNumber)) {
+            alert("Por favor, digite um número de mundo válido.");
+            return;
+        }
+
+        localStorage.setItem('tw_world_number', worldNumber);
+        
+        const analyticsTab = window.open(`https://br${worldNumber}.tribalwars.com.br/game.php`, '_blank');
+        
+        // Espera um pouco e processa os dados automaticamente
+        setTimeout(() => {
+          processarAnalise();
+        }, 1500); 
+    }
+    
     // FARM
     function calcularFarm() {
       const meusPontosInput = document.getElementById('meusPontos').value;
@@ -501,37 +482,104 @@
 
     // ANÁLISE DO MUNDO
     function processarAnalise() {
-      const mundo = document.getElementById('analiseWorldSelect').value;
-      const villageData = document.getElementById('analiseVillageData').value;
-      const playerData = document.getElementById('analisePlayerData').value;
-      const allyData = document.getElementById('analiseAllyData').value;
-      const resultadosDiv = document.getElementById('analiseResultados');
+        const mundo = localStorage.getItem('tw_world_number');
+        const analiseVillageData = localStorage.getItem('tw_export_data_village');
+        const analisePlayerData = localStorage.getItem('tw_export_data_player');
+        const analiseAllyData = localStorage.getItem('tw_export_data_ally');
+        const resultadosDiv = document.getElementById('analiseResultados');
 
-      if (!villageData || !playerData || !allyData) {
-        alert("Por favor, cole os dados de Aldeias, Jogadores e Tribos.");
-        return;
-      }
+        if (!mundo) {
+            alert("Por favor, configure o número do mundo e clique em 'Analisar o Mundo'.");
+            return;
+        }
+        if (!analiseVillageData || !analisePlayerData || !analiseAllyData) {
+            alert("Dados não encontrados. Clique em 'Analisar o Mundo' para carregar a informação.");
+            return;
+        }
 
-      // 1. Processar dados
-      const aldeias = processarVillages(villageData);
-      const jogadores = processarPlayers(playerData);
-      const tribos = processarAllies(allyData);
+        const aldeiasAtuais = processarVillages(analiseVillageData);
+        const jogadoresAtuais = processarPlayers(analisePlayerData);
+        const tribosAtuais = processarAllies(analiseAllyData);
+        
+        const dataKey = `analiseData-${mundo}`;
+        const dataSalva = JSON.parse(localStorage.getItem(dataKey)) || {};
 
-      // 2. Análises
-      const topAldeias = getTopVillages(aldeias, jogadores);
-      const topTribos = getTopTribes(tribos);
-      const melhoresFarms = getBestFarms(aldeias);
+        let resultadosHtml = "<h3>Relatório de Análise</h3>";
+        
+        const playersData = {
+            timestamp: Date.now(),
+            jogadores: jogadoresAtuais,
+            aldeias: aldeiasAtuais,
+            tribos: tribosAtuais
+        };
+        
+        if (dataSalva.playersData && dataSalva.playersData.length > 0) {
+            const ultimaSessao = dataSalva.playersData[dataSalva.playersData.length - 1];
+            const jogadoresAnteriores = ultimaSessao.jogadores;
+            const tempoPassado = (playersData.timestamp - ultimaSessao.timestamp) / (1000 * 60 * 60);
 
-      const resultadoHTML = `
-        <h3>Maiores Aldeias</h3>
-        <ol>${topAldeias.map(item => `<li>**${item.nome} (${item.pontos} pts)** - ${item.jogador} - ${item.coords}</li>`).join('')}</ol>
-        <h3>Maiores Tribos</h3>
-        <ol>${topTribos.map(item => `<li>**${item.nome} (${item.pontos} pts)** - Membros: ${item.membros}</li>`).join('')}</ol>
-        <h3>Melhores Alvos de Farm</h3>
-        <ol>${melhoresFarms.map(item => `<li>**${item.tipo} (${item.pontos} pts)** - ${item.coords}</li>`).join('')}</ol>
-      `;
-      resultadosDiv.innerHTML = resultadoHTML;
-      localStorage.setItem(`analiseResultados-${mundo}`, resultadoHTML);
+            const jogadoresInativos = [];
+            const crescimentoJogador = [];
+
+            for (const id in jogadoresAtuais) {
+                if (jogadoresAnteriores[id]) {
+                    const pontosAnteriores = jogadoresAnteriores[id].pontos;
+                    const pontosAtuais = jogadoresAtuais[id].pontos;
+                    const mudancaPontos = pontosAtuais - pontosAnteriores;
+
+                    if (mudancaPontos === 0) {
+                        jogadoresInativos.push({
+                            nome: jogadoresAtuais[id].nome,
+                            pontos: pontosAtuais
+                        });
+                    } else {
+                        crescimentoJogador.push({
+                            nome: jogadoresAtuais[id].nome,
+                            mudanca: mudancaPontos
+                        });
+                    }
+                }
+            }
+            
+            jogadoresInativos.sort((a,b) => b.pontos - a.pontos);
+            crescimentoJogador.sort((a,b) => b.mudanca - a.mudanca);
+
+            resultadosHtml += `<h3>Análise de Crescimento (últimas ${tempoPassado.toFixed(1)} horas)</h3>`;
+            resultadosHtml += `<h4>Top 10 Jogadores com Maior Crescimento</h4><ol>`;
+            crescimentoJogador.slice(0,10).forEach(j => {
+                resultadosHtml += `<li>${j.nome} (+${j.mudanca} pts)</li>`;
+            });
+            resultadosHtml += `</ol>`;
+
+            resultadosHtml += `<h4>Jogadores Inativos (0 pontos de crescimento)</h4><ul>`;
+            jogadoresInativos.slice(0, 20).forEach(j => {
+                resultadosHtml += `<li>${j.nome} (${j.pontos} pts)</li>`;
+            });
+            resultadosHtml += `</ul>`;
+        } else {
+            resultadosHtml += `<p>Cole os dados novamente amanhã para ativar a análise de crescimento!</p>`;
+        }
+        
+        if (!dataSalva.playersData) {
+            dataSalva.playersData = [];
+        }
+        dataSalva.playersData.push(playersData);
+        localStorage.setItem(dataKey, JSON.stringify(dataSalva));
+
+        const topAldeias = getTopVillages(aldeiasAtuais, jogadoresAtuais);
+        const topTribos = getTopTribes(tribosAtuais);
+        const melhoresFarms = getBestFarms(aldeiasAtuais);
+
+        resultadosHtml += `<h3>Maiores Aldeias</h3>
+            <ol>${topAldeias.map(item => `<li>**${item.nome} (${item.pontos} pts)** - ${item.jogador} - ${item.coords}</li>`).join('')}</ol>
+            <h3>Maiores Tribos</h3>
+            <ol>${topTribos.map(item => `<li>**${item.nome} (${item.pontos} pts)** - Membros: ${item.membros}</li>`).join('')}</ol>
+            <h3>Melhores Alvos de Farm</h3>
+            <ol>${melhoresFarms.map(item => `<li>**${item.tipo} (${item.pontos} pts)** - ${item.coords}</li>`).join('')}</ol>
+        `;
+
+        resultadosDiv.innerHTML = resultadosHtml;
+        localStorage.setItem(`analiseResultados-${mundo}`, resultadosHtml);
     }
 
     // PLANO DE ATAQUE
@@ -602,12 +650,12 @@
       const aldeias = {};
       const linhas = data.split('\n');
       linhas.forEach(linha => {
-        const partes = linha.split(',');
+        const partes = linha.split('\t');
         if (partes.length >= 6) {
           const id = parseInt(partes[0]);
           aldeias[id] = {
             id: id,
-            nome: decodeURIComponent(partes[1].replace(/\+/g, '%20')),
+            nome: partes[1],
             x: parseInt(partes[2]),
             y: parseInt(partes[3]),
             jogadorID: parseInt(partes[4]),
@@ -622,12 +670,12 @@
       const jogadores = {};
       const linhas = data.split('\n');
       linhas.forEach(linha => {
-        const partes = linha.split(',');
+        const partes = linha.split('\t');
         if (partes.length >= 4) {
           const id = parseInt(partes[0]);
           jogadores[id] = {
             id: id,
-            nome: decodeURIComponent(partes[1].replace(/\+/g, '%20')),
+            nome: partes[1],
             allyID: parseInt(partes[2]),
             pontos: parseInt(partes[3])
           };
@@ -640,20 +688,21 @@
       const tribos = {};
       const linhas = data.split('\n');
       linhas.forEach(linha => {
-        const partes = linha.split(',');
+        const partes = linha.split('\t');
         if (partes.length >= 4) {
           const id = parseInt(partes[0]);
           tribos[id] = {
             id: id,
-            nome: decodeURIComponent(partes[1].replace(/\+/g, '%20')),
-            tag: decodeURIComponent(partes[2].replace(/\+/g, '%20')),
+            nome: partes[1],
+            tag: partes[2],
             membros: parseInt(partes[3]),
           };
         }
       });
       return tribos;
     }
-
+    
+    // Funções de análise de dados
     function getTopVillages(aldeias, jogadores) {
       const lista = Object.values(aldeias).filter(a => a.jogadorID > 0).sort((a, b) => b.pontos - a.pontos).slice(0, 50);
       return lista.map(aldeia => ({
@@ -665,8 +714,17 @@
     }
 
     function getTopTribes(tribos) {
-      return Object.values(tribos).sort((a, b) => b.pontos - a.pontos).slice(0, 50);
+        let tribosComPontos = Object.values(tribos).map(tribo => {
+            let totalPontos = 0;
+            return {
+                ...tribo,
+                pontos: tribo.pontos
+            };
+        });
+        
+        return tribosComPontos.sort((a, b) => b.pontos - a.pontos).slice(0, 50);
     }
+
 
     function getBestFarms(aldeias) {
       const farms = Object.values(aldeias).filter(a => a.jogadorID === 0).sort((a, b) => b.pontos - a.pontos).slice(0, 50);
@@ -677,16 +735,11 @@
       }));
     }
     
-    // Adicionando evento de mudança aos selects de mundo
-    document.getElementById('farmWorldSelect').addEventListener('change', () => carregarResultados('farmWorldSelect', 'proximosResult'));
-    document.getElementById('analiseWorldSelect').addEventListener('change', () => carregarResultados('analiseWorldSelect', 'analiseResultados'));
-    document.getElementById('planoWorldSelect').addEventListener('change', () => carregarResultados('planoWorldSelect', 'planoAtaqueResult'));
-
-    // Carregar resultados salvos ao carregar a página
     window.onload = () => {
-        carregarResultados('farmWorldSelect', 'proximosResult');
-        carregarResultados('analiseWorldSelect', 'analiseResultados');
-        carregarResultados('planoWorldSelect', 'planoAtaqueResult');
+        const savedWorld = localStorage.getItem('tw_world_number');
+        if (savedWorld) {
+            document.getElementById('worldConfig').value = savedWorld;
+        }
     };
   </script>
 </body>
