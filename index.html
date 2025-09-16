@@ -306,8 +306,16 @@
         }
 
         localStorage.setItem('tw_world_number', worldNumber);
-        
-        const analyticsTab = window.open(`https://br${worldNumber}.tribalwars.com.br/game.php`, '_blank');
+
+        let urlToOpen;
+        // Verifica se é um mundo de arquivo (geralmente <= 130)
+        if (worldNumber <= 130) {
+            urlToOpen = `https://www.tribalwars.com.br/archive/br${worldNumber}`;
+        } else {
+            urlToOpen = `https://br${worldNumber}.tribalwars.com.br/game.php`;
+        }
+
+        const analyticsTab = window.open(urlToOpen, '_blank');
         
         // Espera um pouco e processa os dados automaticamente
         setTimeout(() => {
