@@ -1,566 +1,892 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard Tribal Wars</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f4f6f9; }
-    header { background: #2c3e50; color: white; padding: 15px; text-align: center; }
-    nav { display: flex; justify-content: center; background: #34495e; flex-wrap: wrap; }
-    nav button {
-      flex: 1; max-width: 200px; border: none;
-      background: #34495e; color: white;
-      padding: 15px; cursor: pointer;
-      font-size: 16px; transition: background 0.3s;
-    }
-    nav button:hover, nav button.active { background: #1abc9c; }
-    section { display: none; padding: 20px; }
-    section.active { display: block; }
-    .card {
-      background: white; border-radius: 10px;
-      padding: 20px; margin-bottom: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    input, button, textarea, select {
-      padding: 8px; margin: 5px 0; width: 100%;
-      border: 1px solid #ccc; border-radius: 5px;
-    }
-    button.action {
-      background: #1abc9c; color: white;
-      border: none; cursor: pointer;
-      transition: background 0.3s; width: auto;
-    }
-    button.action:hover { background: #16a085; }
-    .button-group { display: flex; gap: 10px; }
-    .button-group button { flex: 1; }
-    ul { margin: 10px 0; padding-left: 20px; }
-
-    .analise-card {
-      background-color: #e8f5e9;
-      border-left: 5px solid #1abc9c;
-      padding: 15px;
-      margin-top: 20px;
-    }
-    .analise-card h3 {
-      margin-top: 0;
-      color: #2c3e50;
-    }
-    .analise-card p {
-      margin: 5px 0;
-    }
-    .analise-card ul {
-      margin: 10px 0;
-      padding-left: 20px;
-    }
-    .world-select-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-    .world-select-group label {
-        width: auto;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tribal Wars Tools</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2e2e2e;
+            color: #f0f0f0;
+            background-image: url('https://www.tribalwars.net/gfx/bg/1600x900.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        #sidebar {
+            width: 250px;
+            background-color: rgba(30, 30, 30, 0.9);
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+        }
+        #sidebar h2 {
+            color: #d4a761;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .sidebar-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .sidebar-item:hover {
+            background-color: #444;
+        }
+        .sidebar-item.active {
+            background-color: #d4a761;
+            color: black;
+            font-weight: bold;
+        }
+        #main-content {
+            flex-grow: 1;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+        }
+        .content-section {
+            display: none;
+            background-color: rgba(30, 30, 30, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .content-section.active {
+            display: block;
+        }
+        h1 {
+            text-align: center;
+            color: #d4a761;
+            text-shadow: 2px 2px 4px #000;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input[type="number"], .input-group textarea, .input-group input[type="text"], .input-group select, .input-group input[type="datetime-local"] {
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #3a3a3a;
+            color: #f0f0f0;
+            resize: vertical;
+        }
+        .buttons-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            color: white;
+        }
+        .btn-primary {
+            background-color: #4a90e2;
+        }
+        .btn-primary:hover {
+            background-color: #357bd8;
+        }
+        .btn-secondary {
+            background-color: #d4a761;
+            color: black;
+        }
+        .btn-secondary:hover {
+            background-color: #c09653;
+        }
+        .results-container {
+            margin-top: 30px;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background-color: #2e2e2e;
+            color: #aaa;
+            cursor: pointer;
+            font-weight: bold;
+            transition: color 0.3s, background-color 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn:hover {
+            color: #fff;
+        }
+        .tab-btn.active {
+            background-color: #3a3a3a;
+            color: #fff;
+            border-bottom: 3px solid #d4a761;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        .results-table th, .results-table td {
+            padding: 8px;
+            border: 1px solid #555;
+            text-align: left;
+        }
+        .results-table th {
+            background-color: #2e2e2e;
+            cursor: pointer;
+        }
+        .results-table tr:nth-child(even) {
+            background-color: #242424;
+        }
+        .results-table tr:hover {
+            background-color: #444;
+        }
+        .results-table th.sorted-asc::after {
+            content: ' ▲';
+        }
+        .results-table th.sorted-desc::after {
+            content: ' ▼';
+        }
+        #sort-tip {
+            text-align: center;
+            font-size: 0.9em;
+            color: #d4a761;
+            margin-bottom: 10px;
+        }
+        .analysis-btn {
+            padding: 5px 10px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .analysis-btn:hover {
+            background-color: #357bd8;
+        }
+        .attack-analysis, .strategy-analysis, .travel-time-result, .attack-planner-result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #3a3a3a;
+            border-radius: 5px;
+            border: 1px solid #d4a761;
+        }
+        .attack-analysis h3, .strategy-analysis h3, .travel-time-result h3, .attack-planner-result h3 {
+            margin-top: 0;
+            color: #d4a761;
+        }
+        .attack-analysis p, .strategy-analysis p, .travel-time-result p, .attack-planner-result p {
+            margin: 5px 0;
+        }
+        .attack-planner-result p span {
+            font-weight: bold;
+            color: #d4a761;
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <h1>Dashboard Tribal Wars</h1>
-    <p>Ferramenta de estratégia e planejamento</p>
-  </header>
-
-  <nav>
-    <button class="active" onclick="showTab('farm')">⚔️ Farm</button>
-    <button onclick="showTab('estrategia')">🛡️ Estratégia e Evolução</button>
-    <button onclick="showTab('analise')">📊 Análise do Mundo</button>
-    <button onclick="showTab('plano')">📝 Plano de Ataque</button>
-  </nav>
-
-  <section id="farm" class="active">
-    <div class="card">
-      <h2>Calculadora de Farm</h2>
-      <label>Sua pontuação:<br>
-        <input type="number" id="meusPontos">
-      </label>
-      <label>Sua coordenada (ex: 500|500):<br>
-        <input type="text" id="minhaCoord">
-      </label>
-      <label>Pontuação da aldeia alvo:<br>
-        <input type="number" id="alvoPontos">
-      </label>
-      <label>Coordenada da aldeia alvo (ex: 510|495):<br>
-        <input type="text" id="alvoCoord">
-      </label>
-      <label>Tipo da aldeia:<br>
-        <select id="tipoAldeia">
-          <option value="barbara">Bárbara</option>
-          <option value="bonus">Bônus</option>
-        </select>
-      </label>
-      <div class="button-group">
-        <button class="action" onclick="calcularFarm()">Calcular Farm</button>
-        <button class="action" onclick="limparResultado('farmResult')">Limpar</button>
-      </div>
-      <div id="farmResult" style="margin-top:15px;"></div>
+<div class="app-container">
+    <div id="sidebar">
+        <h2>Menu</h2>
+        <div class="sidebar-item active" data-target="analysis-section">Análise</div>
+        <div class="sidebar-item" data-target="plan-section">Plano de Ataque / Defesa</div>
+        <div class="sidebar-item" data-target="strategy-section">Estratégia por coordenada</div>
     </div>
-    <div class="card">
-      <h2>Encontre Farms Próximos</h2>
-      <p>1. Selecione o mundo abaixo.</p>
-      <p>2. Clique na aba **Análise do Mundo** para copiar e colar os dados.</p>
-      <p>3. Clique no botão para processar e encontrar as aldeias mais próximas.</p>
-      <div class="world-select-group">
-          <label for="farmWorldSelect">Selecione o Mundo:</label>
-          <select id="farmWorldSelect">
-              <option value="136">Mundo 136</option>
-              <option value="137">Mundo 137</option>
-          </select>
-      </div>
-      <label>Sua Coordenada (ex: 500|500):
-        <input type="text" id="minhaCoord2">
-      </label>
-      <div class="button-group">
-        <button class="action" onclick="encontrarFarmsProximos()">Encontrar Aldeias</button>
-        <button class="action" onclick="limparResultado('proximosResult')">Limpar</button>
-      </div>
-      <div id="proximosResult" style="margin-top:15px;"></div>
+
+    <div id="main-content">
+        <div id="analysis-section" class="content-section active">
+            <div class="container">
+                <h1>Análise de Aldeias</h1>
+                <div class="section">
+                    <div class="input-group">
+                        <label for="worldNumber">Número do Mundo:</label>
+                        <input type="number" id="worldNumber" placeholder="Ex: 137">
+                    </div>
+                    <div class="buttons-group" id="downloadGroup">
+                        <button class="btn btn-primary" id="downloadButton">Baixar Lista</button>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="input-group">
+                        <label for="dataInput">Cole aqui os dados da lista de aldeias:</label>
+                        <textarea id="dataInput" rows="3"></textarea>
+                    </div>
+                    <div class="buttons-group">
+                        <button class="btn btn-secondary" id="generateReportButton">Gerar Relatório</button>
+                    </div>
+                </div>
+                <div class="section results-container">
+                    <h2>Resultados da Análise</h2>
+                    <div class="tabs">
+                        <button class="tab-btn active" id="tab-player">Jogadores</button>
+                        <button class="tab-btn" id="tab-barbarian">Bárbaros</button>
+                        <button class="tab-btn" id="tab-bonus">Bônus</button>
+                    </div>
+                    <p id="sort-tip">Clique no nome da coluna para ordenar a lista (crescente/decrescente).</p>
+                    <div class="input-group">
+                        <label for="searchInput">Pesquisar Aldeia:</label>
+                        <input type="text" id="searchInput" placeholder="Digite o nome da aldeia">
+                    </div>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th data-column="name">Nome da Aldeia</th>
+                                <th data-column="coords">Coordenadas</th>
+                                <th data-column="points">Pontos</th>
+                                <th data-column="playerId">ID do Jogador</th>
+                                <th data-column="rank">Classificação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="plan-section" class="content-section">
+            <div class="container">
+                <h1>Plano de Ataque / Defesa</h1>
+                <div class="section">
+                    <div class="input-group">
+                        <label for="userCoords">Suas Coordenadas (X|Y):</label>
+                        <input type="text" id="userCoords" placeholder="Ex: 500|500">
+                    </div>
+                    <div class="input-group">
+                        <label for="searchRadius">Raio de Busca:</label>
+                        <input type="number" id="searchRadius" placeholder="Ex: 10">
+                    </div>
+                    <div class="buttons-group">
+                        <button class="btn btn-secondary" id="searchRadiusButton">Buscar no Raio</button>
+                    </div>
+                </div>
+                <div class="section results-container">
+                    <h2>Aldeias Próximas</h2>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Nome da Aldeia</th>
+                                <th>Coordenadas</th>
+                                <th>Pontos</th>
+                                <th>Distância</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="radiusTableBody">
+                            </tbody>
+                    </table>
+                </div>
+                <div id="attack-analysis-container"></div>
+            </div>
+        </div>
+
+        <div id="strategy-section" class="content-section">
+            <div class="container">
+                <h1>Estratégia por Coordenada</h1>
+                <div class="section">
+                    <div class="input-group">
+                        <label for="userVillageCoords">Coordenadas da sua Aldeia (X|Y):</label>
+                        <input type="text" id="userVillageCoords" placeholder="Ex: 500|500">
+                    </div>
+                    <div class="buttons-group">
+                        <button class="btn btn-secondary" id="analyzeStrategyButton">Encontrar Aldeias Próximas</button>
+                    </div>
+                </div>
+                 <div class="section results-container">
+                    <div class="tabs" id="strategy-tabs" style="display:none;">
+                        <button class="tab-btn active" id="strategy-tab-all">Todas</button>
+                        <button class="tab-btn" id="strategy-tab-player">Jogadores</button>
+                        <button class="tab-btn" id="strategy-tab-barbarian">Bárbaros</button>
+                        <button class="tab-btn" id="strategy-tab-bonus">Bônus</button>
+                    </div>
+                    <h2>Aldeias ao Redor</h2>
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Nome da Aldeia</th>
+                                <th>Coordenadas</th>
+                                <th>Pontos</th>
+                                <th>Distância</th>
+                            </tr>
+                        </thead>
+                        <tbody id="strategyTableBody">
+                            </tbody>
+                    </table>
+                </div>
+                
+                <div class="section">
+                    <h2>Calculadora de Viagem</h2>
+                    <div class="input-group">
+                        <label for="originCoords">Coordenadas de Origem (X|Y):</label>
+                        <input type="text" id="originCoords" placeholder="Ex: 500|500">
+                    </div>
+                    <div class="input-group">
+                        <label for="destinyCoords">Coordenadas de Destino (X|Y):</label>
+                        <input type="text" id="destinyCoords" placeholder="Ex: 500|500">
+                    </div>
+                    <div class="input-group">
+                        <label for="troopType">Tipo de Tropa:</label>
+                        <select id="troopType">
+                            <option value="spear">Lanceiro</option>
+                            <option value="sword">Espadachim</option>
+                            <option value="axe">Machadeiro</option>
+                            <option value="archer">Arqueiro</option>
+                            <option value="scout">Explorador</option>
+                            <option value="light">Cavalaria Leve</option>
+                            <option value="marcher">Arqueiro a Cavalo</option>
+                            <option value="heavy">Cavalaria Pesada</option>
+                            <option value="ram">Aríete</option>
+                            <option value="catapult">Catapulta</option>
+                            <option value="snob">Nobre</option>
+                        </select>
+                    </div>
+                    <div class="buttons-group">
+                        <button class="btn btn-secondary" id="calculateTimeButton">Calcular Tempo</button>
+                    </div>
+                    <div id="travelTimeResult" class="travel-time-result" style="display:none;">
+                        <h3>Tempo de Viagem</h3>
+                        <p id="timeOutput"></p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Planejador de Ataque</h2>
+                    <div class="input-group">
+                        <label for="attackOriginCoords">Coordenadas de Origem (X|Y):</label>
+                        <input type="text" id="attackOriginCoords" placeholder="Ex: 500|500">
+                    </div>
+                    <div class="input-group">
+                        <label for="attackDestinyCoords">Coordenadas de Destino (X|Y):</label>
+                        <input type="text" id="attackDestinyCoords" placeholder="Ex: 500|500">
+                    </div>
+                    <div class="input-group">
+                        <label for="arrivalTime">Horário de Chegada (Data e Hora):</label>
+                        <input type="datetime-local" id="arrivalTime">
+                    </div>
+                    <div class="buttons-group">
+                        <button class="btn btn-secondary" id="planAttackButton">Planejar Ataque</button>
+                    </div>
+                    <div id="attackPlannerResult" class="attack-planner-result" style="display:none;">
+                        <h3>Horários de Partida</h3>
+                        <p id="departureTimesOutput"></p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
-  </section>
+</div>
 
-  <section id="estrategia">
-    <div class="card">
-      <h2>Treinador Estratégico</h2>
-      <label>Sua pontuação atual:<br>
-        <input type="number" id="estratMeusPontos">
-      </label>
-      <div class="button-group">
-        <button class="action" onclick="gerarGuiaTreinamento()">Gerar Guia de Treinamento</button>
-        <button class="action" onclick="limparResultado('guiaTreinamento')">Limpar</button>
-      </div>
-    </div>
-    <div id="guiaTreinamento" class="analise-card" style="display: none;"></div>
-  </section>
-
-  <section id="analise">
-    <div class="card">
-      <h2>Análise de Dados do Mundo</h2>
-      <p>Para usar esta ferramenta, copie e cole os dados brutos das páginas de classificação do Tribal Wars.</p>
-      <p>Visite a página de cada tipo de dado, copie todo o conteúdo e cole no campo abaixo.</p>
-      <label>Dados (Cole aqui o conteúdo de um dos arquivos):<br>
-        <textarea id="analiseRawData" rows="10"></textarea>
-      </label>
-      <div class="button-group" style="margin-top: 20px;">
-        <button class="action" onclick="processarDados('village')">Salvar Aldeias (village.txt)</button>
-        <button class="action" onclick="processarDados('player')">Salvar Jogadores (player.txt)</button>
-        <button class="action" onclick="processarDados('ally')">Salvar Tribos (ally.txt)</button>
-      </div>
-      <div style="margin-top: 15px;">
-        <p>Dados salvos no navegador:</p>
-        <ul id="dataStatus"></ul>
-      </div>
-      <div class="button-group" style="margin-top: 20px;">
-        <button class="action" onclick="executarAnalise()">Executar Análise</button>
-      </div>
-      <div id="analiseResultados" style="margin-top: 15px;"></div>
-    </div>
-  </section>
-
-  <section id="plano">
-    <div class="card">
-      <h2>Plano de Ataque Detalhado</h2>
-      <p>1. Selecione seu mundo.</p>
-      <p>2. Clique em **Análise do Mundo** para copiar e colar os dados dos arquivos.</p>
-      <p>3. Insira sua coordenada para encontrar os alvos mais próximos e clique em "Gerar Plano de Ataque".</p>
-      <div class="world-select-group">
-          <label for="planoWorldSelect">Selecione o Mundo:</label>
-          <select id="planoWorldSelect">
-              <option value="136">Mundo 136</option>
-              <option value="137">Mundo 137</option>
-          </select>
-      </div>
-      <label>Sua Coordenada (ex: 500|500):
-        <input type="text" id="minhaCoordPlano">
-      </label>
-      <div class="button-group">
-        <button class="action" onclick="gerarPlanoAtaque()">Gerar Plano de Ataque</button>
-        <button class="action" onclick="limparResultado('planoAtaqueResult')">Limpar</button>
-      </div>
-      <div id="planoAtaqueResult" style="margin-top: 15px;"></div>
-    </div>
-  </section>
-
-  <script>
-    const tropas = {
-      lanceiro: { nome: "Lanceiro", carga: 25 },
-      espada: { nome: "Espadachim", carga: 15 },
-      leve: { nome: "Infantaria Leve", carga: 80 },
-      pesada: { nome: "Cavalaria Pesada", carga: 50 }
-    };
-
-    const guias = {
-      'iniciante': {
-        titulo: "Fase Inicial (Até 500 pontos)",
-        estrategia: "Foco total em crescimento rápido e farm. Priorize a produção de recursos para alimentar o crescimento da sua primeira aldeia.",
-        tropasDefesa: "Construa até 500 lanceiros para uma defesa básica. São eficientes contra cavalaria e farm pesados.",
-        tropasAtaque: "Comece com 200 Cavalaria Leve. Eles são ideais para farm de aldeias bárbaras e alvos fracos, por sua velocidade e capacidade de carga.",
-        planoEvolucao: [
-          "Edifício Principal Nv 15 (Para aceleração da construção)",
-          "Quartel Nv 5 (Para treinar infantaria)",
-          "Estábulo Nv 1 (Para treinar Cavalaria Leve)",
-          "Madeira, Argila e Ferro Nv 15-20 (Para manter o fluxo de recursos)",
-          "Fazenda Nv 20 (Para suportar mais tropas)"
-        ]
-      },
-      'basico': {
-        titulo: "Meio de Jogo (500 - 1.000 pontos)",
-        estrategia: "Fortaleça sua defesa e inicie o ataque a aldeias de outros jogadores. Aumente o exército para farmar alvos com mais recursos e se preparar para as próximas conquistas.",
-        tropasDefesa: "Mantenha a defesa com 1000 Lanceiros e adicione 500 Espadachins.",
-        tropasAtaque: "Crie uma ofensiva com 1000 Cavalaria Leve, 200 Aríetes e 50 Catapultas. Este é um grupo forte para ataques a jogadores com poucas defesas.",
-        planoEvolucao: [
-          "Muralha Nv 10 (Para defesa estratégica)",
-          "Estábulo Nv 10 (Para acelerar o treinamento de cavalaria)",
-          "Oficina Nv 5 (Para Aríetes e Catapultas)",
-          "Ponto de Encontro Nv 10 (Para planejar ataques múltiplos e enviar mais tropas)",
-          "Feira Nv 10 (Para trocar recursos e financiar o crescimento)"
-        ]
-      },
-      'intermediario': {
-        titulo: "Ataque e Noblagem (1.000 - 4.000 pontos)",
-        estrategia: "Esta é a fase de expansão. Foque em construir um exército de ataque completo e comece a conquistar sua primeira aldeia, além de continuar o farm agressivo.",
-        tropasDefesa: "Construa uma defesa massiva de 5.000 Espadachins para defender a sua primeira aldeia. Mantenha 1.000 lanceiros para suporte.",
-        tropasAtaque: "Ataque com uma força de noblagem: 10.000 Cavalaria Leve, 1.000 Aríetes e 500 Catapultas. Esse exército é capaz de quebrar defesas e abrir caminho para o nobre.",
-        planoEvolucao: [
-          "Academia Nv 1 (Para a noblagem)",
-          "Oficina Nv 15 (Para produção rápida de Aríetes e Catapultas)",
-          "Muralha Nv 20 (Para proteção máxima contra noblagens)",
-          "Sede Nv 20 (Para acelerar construções e noblagens)"
-        ]
-      },
-      'avancado': {
-        titulo: "Fase Avançada (4.000+ pontos)",
-        estrategia: "Você se tornou um jogador forte. O foco agora é na criação de aldeias especializadas (ataque, defesa e farm) e na coordenação de ataques e defesas com sua tribo para dominar o mapa.",
-        tropasDefesa: "Aumente as defesas para 10.000 Lanceiros e 10.000 Espadachins. Pense em criar aldeias de defesa dedicadas (com bônus de defesa e muralhas altas).",
-        tropasAtaque: "Mantenha um exército principal com mais de 5.000 Cavalaria Leve para farm e foque na produção de cavalaria pesada para noblagens em massa. Pelo menos 10.000 de cada.",
-        planoEvolucao: [
-          "Construção de uma segunda aldeia com foco em ataque",
-          "Níveis de edifícios de recursos maximizados",
-          "Coordenação com a tribo para ataques e defesas"
-        ]
-      }
-    };
-
-    function showTab(tabId) {
-      document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
-      document.querySelectorAll("nav button").forEach(btn => btn.classList.remove("active"));
-      document.getElementById(tabId).classList.add("active");
-      document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add("active");
-    }
-
-    function salvarResultado(id, conteudo) {
-      const mundo = getMundoAtual(id);
-      if (!mundo) return;
-      localStorage.setItem(`${id}-${mundo}`, conteudo);
-    }
+<script>
+    let bonusVillages = [];
+    let barbarianVillages = [];
+    let playerVillages = [];
     
-    function salvarDadosBrutos(id, dados) {
-      const mundo = getMundoAtual(id);
-      if (!mundo) return;
-      localStorage.setItem(`${id}-${mundo}`, JSON.stringify(dados));
-    }
+    let allVillages = [];
+    let currentVillages = [];
+    let sortDirection = {};
+    let nearbyVillagesAll = [];
 
-    function limparResultado(id) {
-        const mundo = getMundoAtual(id);
-        if (!mundo) return;
-        localStorage.removeItem(`${id}-${mundo}`);
-        document.getElementById(id).innerHTML = '';
-        if (id === 'guiaTreinamento') {
-            document.getElementById(id).style.display = 'none';
-        }
-        alert("Resultado limpo com sucesso!");
-    }
+    const troopSpeeds = {
+        spear: 18,
+        sword: 22,
+        axe: 18,
+        archer: 18,
+        scout: 9,
+        light: 10,
+        marcher: 10,
+        heavy: 11,
+        ram: 18,
+        catapult: 18,
+        snob: 35
+    };
 
-    function getMundoAtual(id) {
-        if (id.includes('proximosResult')) {
-            return document.getElementById('farmWorldSelect').value;
-        }
-        if (id.includes('analiseResultados')) {
-            // Nova lógica para o modo manual
-            return document.getElementById('analiseWorldSelect').value;
-        }
-        if (id.includes('planoAtaqueResult')) {
-            return document.getElementById('planoWorldSelect').value;
-        }
-        return null;
-    }
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
 
-    function processarDados(tipo) {
-        const rawData = document.getElementById('analiseRawData').value;
-        if (!rawData) {
-            alert("Por favor, cole os dados no campo de texto antes de salvar.");
-            return;
-        }
-
-        let parsedData = {};
-        const linhas = rawData.split('\n');
-
-        if (tipo === 'village') {
-            linhas.forEach(linha => {
-                const partes = linha.split('\t');
-                if (partes.length >= 6) {
-                    const id = parseInt(partes[0]);
-                    parsedData[id] = {
-                        id: id,
-                        nome: partes[1],
-                        x: parseInt(partes[2]),
-                        y: parseInt(partes[3]),
-                        jogadorID: parseInt(partes[4]),
-                        pontos: parseInt(partes[5]),
-                    };
-                }
-            });
-        } else if (tipo === 'player') {
-            linhas.forEach(linha => {
-                const partes = linha.split('\t');
-                if (partes.length >= 4) {
-                    const id = parseInt(partes[0]);
-                    parsedData[id] = {
-                        id: id,
-                        nome: partes[1],
-                        allyID: parseInt(partes[2]),
-                        pontos: parseInt(partes[3])
-                    };
-                }
-            });
-        } else if (tipo === 'ally') {
-            linhas.forEach(linha => {
-                const partes = linha.split('\t');
-                if (partes.length >= 4) {
-                    const id = parseInt(partes[0]);
-                    parsedData[id] = {
-                        id: id,
-                        nome: partes[1],
-                        tag: partes[2],
-                        membros: parseInt(partes[3]),
-                    };
-                }
-            });
-        }
-
-        localStorage.setItem(`analiseData_${tipo}`, JSON.stringify(parsedData));
-        document.getElementById('analiseRawData').value = '';
-        alert(`Dados de ${tipo} salvos com sucesso!`);
-        updateDataStatus();
-    }
-
-    function updateDataStatus() {
-        const statusDiv = document.getElementById('dataStatus');
-        const dataTypes = ['village', 'player', 'ally'];
-        let statusHtml = '';
-
-        dataTypes.forEach(type => {
-            const isSaved = localStorage.getItem(`analiseData_${type}`) !== null;
-            statusHtml += `<li>**${type}**: ${isSaved ? '✅ Salvo' : '❌ Não Salvo'}</li>`;
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            const targetId = this.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
         });
-        statusDiv.innerHTML = statusHtml;
-    }
+    });
 
-    function executarAnalise() {
-        const villageData = localStorage.getItem('analiseData_village');
-        const playerData = localStorage.getItem('analiseData_player');
-        const allyData = localStorage.getItem('analiseData_ally');
-        const resultadosDiv = document.getElementById('analiseResultados');
+    document.getElementById('downloadButton').addEventListener('click', function() {
+        const worldNumber = document.getElementById('worldNumber').value;
+        const downloadGroup = document.getElementById('downloadGroup');
 
-        if (!villageData || !playerData || !allyData) {
-            alert("Por favor, salve os dados de aldeias, jogadores e tribos antes de executar a análise.");
+        if (worldNumber) {
+            const url = `https://br${worldNumber}.tribalwars.com.br/map/village.txt`;
+            const newLink = document.createElement('a');
+            newLink.href = url;
+            newLink.target = "_blank";
+            newLink.textContent = "Clique para Copiar a Lista!";
+            newLink.classList.add('btn', 'btn-primary');
+            
+            downloadGroup.innerHTML = '';
+            downloadGroup.appendChild(newLink);
+
+        } else {
+            alert('Por favor, digite o número do mundo.');
+        }
+    });
+
+    document.getElementById('generateReportButton').addEventListener('click', function() {
+        const data = document.getElementById('dataInput').value;
+        if (!data) {
+            alert('Por favor, cole os dados antes de gerar o relatório.');
             return;
         }
 
-        const aldeiasAtuais = JSON.parse(villageData);
-        const jogadoresAtuais = JSON.parse(playerData);
-        const tribosAtuais = JSON.parse(allyData);
+        const lines = data.split('\n').filter(line => line.trim() !== '');
         
-        const dataKey = `analiseData`;
-        const dataSalva = JSON.parse(localStorage.getItem(dataKey)) || {};
+        bonusVillages = [];
+        barbarianVillages = [];
+        playerVillages = [];
 
-        let resultadosHtml = "<h3>Relatório de Análise</h3>";
-        
-        const playersData = {
-            timestamp: Date.now(),
-            jogadores: jogadoresAtuais,
-            aldeias: aldeiasAtuais,
-            tribos: tribosAtuais
-        };
-        
-        if (dataSalva.playersData && dataSalva.playersData.length > 0) {
-            const ultimaSessao = dataSalva.playersData[dataSalva.playersData.length - 1];
-            const jogadoresAnteriores = ultimaSessao.jogadores;
-            const tempoPassado = (playersData.timestamp - ultimaSessao.timestamp) / (1000 * 60 * 60);
+        lines.forEach(line => {
+            const parts = line.split(',');
+            if (parts.length >= 6) { 
+                const villageName = decodeURIComponent(parts[1].replace(/\+/g, ' '));
+                const coords = `${parts[2]}|${parts[3]}`;
+                const playerId = parseInt(parts[4], 10);
+                const points = parseInt(parts[5], 10);
+                const rank = parts[6] || 'N/A';
 
-            const jogadoresInativos = [];
-            const crescimentoJogador = [];
-
-            for (const id in jogadoresAtuais) {
-                if (jogadoresAnteriores[id]) {
-                    const pontosAnteriores = jogadoresAnteriores[id].pontos;
-                    const pontosAtuais = jogadoresAtuais[id].pontos;
-                    const mudancaPontos = pontosAtuais - pontosAnteriores;
-
-                    if (mudancaPontos === 0) {
-                        jogadoresInativos.push({
-                            nome: jogadoresAtuais[id].nome,
-                            pontos: pontosAtuais
-                        });
+                const village = {
+                    name: villageName,
+                    coords: coords,
+                    points: points,
+                    playerId: playerId,
+                    rank: rank,
+                    x: parseInt(parts[2], 10),
+                    y: parseInt(parts[3], 10)
+                };
+                
+                if (playerId === 0) {
+                    if (villageName.includes('Aldeia-bonus')) {
+                        bonusVillages.push(village);
                     } else {
-                        crescimentoJogador.push({
-                            nome: jogadoresAtuais[id].nome,
-                            mudanca: mudancaPontos
-                        });
+                        barbarianVillages.push(village);
                     }
+                } else {
+                    playerVillages.push(village);
                 }
             }
-            
-            jogadoresInativos.sort((a,b) => b.pontos - a.pontos);
-            crescimentoJogador.sort((a,b) => b.mudanca - a.mudanca);
-
-            resultadosHtml += `<h3>Análise de Crescimento (últimas ${tempoPassado.toFixed(1)} horas)</h3>`;
-            resultadosHtml += `<h4>Top 10 Jogadores com Maior Crescimento</h4><ol>`;
-            crescimentoJogador.slice(0,10).forEach(j => {
-                resultadosHtml += `<li>${j.nome} (+${j.mudanca} pts)</li>`;
-            });
-            resultadosHtml += `</ol>`;
-
-            resultadosHtml += `<h4>Jogadores Inativos (0 pontos de crescimento)</h4><ul>`;
-            jogadoresInativos.slice(0, 20).forEach(j => {
-                resultadosHtml += `<li>${j.nome} (${j.pontos} pts)</li>`;
-            });
-            resultadosHtml += `</ul>`;
-        } else {
-            resultadosHtml += `<p>Cole os dados novamente amanhã para ativar a análise de crescimento!</p>`;
-        }
+        });
         
-        if (!dataSalva.playersData) {
-            dataSalva.playersData = [];
+        currentVillages = playerVillages;
+        allVillages = playerVillages;
+        displayVillages(currentVillages);
+        
+        document.getElementById('tab-player').classList.add('active');
+        document.getElementById('tab-barbarian').classList.remove('active');
+        document.getElementById('tab-bonus').classList.remove('active');
+    });
+
+    function displayVillages(villageList) {
+        const tableBody = document.getElementById('resultsTableBody');
+        tableBody.innerHTML = '';
+        
+        villageList.forEach(village => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${village.name}</td>
+                <td>${village.coords}</td>
+                <td>${village.points}</td>
+                <td>${village.playerId}</td>
+                <td>${village.rank}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+    
+    document.getElementById('tab-player').addEventListener('click', function() {
+        allVillages = playerVillages;
+        currentVillages = allVillages;
+        displayVillages(currentVillages);
+        clearSortIndicators();
+        this.classList.add('active');
+        document.getElementById('tab-barbarian').classList.remove('active');
+        document.getElementById('tab-bonus').classList.remove('active');
+        document.getElementById('searchInput').value = '';
+    });
+
+    document.getElementById('tab-barbarian').addEventListener('click', function() {
+        allVillages = barbarianVillages;
+        currentVillages = allVillages;
+        displayVillages(currentVillages);
+        clearSortIndicators();
+        this.classList.add('active');
+        document.getElementById('tab-player').classList.remove('active');
+        document.getElementById('tab-bonus').classList.remove('active');
+        document.getElementById('searchInput').value = '';
+    });
+
+    document.getElementById('tab-bonus').addEventListener('click', function() {
+        allVillages = bonusVillages;
+        currentVillages = allVillages;
+        displayVillages(currentVillages);
+        clearSortIndicators();
+        this.classList.add('active');
+        document.getElementById('tab-player').classList.remove('active');
+        document.getElementById('tab-barbarian').classList.remove('active');
+        document.getElementById('searchInput').value = '';
+    });
+
+    document.querySelectorAll('.results-table th').forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.dataset.column;
+            if (!column) return;
+            
+            clearSortIndicators(this);
+            
+            const isNumeric = (column === 'points' || column === 'playerId' || column === 'rank');
+            const direction = sortDirection[column] === 'asc' ? 'desc' : 'asc';
+            
+            currentVillages.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                if (isNumeric) {
+                    aVal = parseFloat(aVal);
+                    bVal = parseFloat(bVal);
+                }
+
+                if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            sortDirection[column] = direction;
+            this.classList.add(`sorted-${direction}`);
+            
+            displayVillages(currentVillages);
+        });
+    });
+
+    function clearSortIndicators(activeHeader) {
+        document.querySelectorAll('.results-table th').forEach(th => {
+            if (th !== activeHeader) {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            }
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const filteredVillages = allVillages.filter(village => {
+            return village.name.toLowerCase().includes(searchTerm);
+        });
+        currentVillages = filteredVillages;
+        displayVillages(currentVillages);
+        clearSortIndicators();
+    });
+
+    document.getElementById('searchRadiusButton').addEventListener('click', function() {
+        if (playerVillages.length === 0) {
+            alert('Atenção: A lista de aldeias de jogadores está vazia. Por favor, cole os dados na aba "Análise" e clique em "Gerar Relatório" primeiro.');
+            return;
         }
-        dataSalva.playersData.push(playersData);
-        localStorage.setItem(dataKey, JSON.stringify(dataSalva));
 
-        const topAldeias = getTopVillages(aldeiasAtuais, jogadoresAtuais);
-        const topTribos = getTopTribes(tribosAtuais);
-        const melhoresFarms = getBestFarms(aldeiasAtuais);
+        const userCoordsInput = document.getElementById('userCoords').value;
+        const radius = parseInt(document.getElementById('searchRadius').value, 10);
+        
+        const coordsParts = userCoordsInput.split('|');
+        if (coordsParts.length !== 2 || isNaN(parseInt(coordsParts[0], 10)) || isNaN(parseInt(coordsParts[1], 10))) {
+            alert('Erro: Por favor, insira as coordenadas no formato X|Y. Ex: 500|500');
+            return;
+        }
 
-        resultadosHtml += `<h3>Maiores Aldeias</h3>
-            <ol>${topAldeias.map(item => `<li>**${item.nome} (${item.pontos} pts)** - ${item.jogador} - ${item.coords}</li>`).join('')}</ol>
-            <h3>Maiores Tribos</h3>
-            <ol>${topTribos.map(item => `<li>**${item.nome} (${item.pontos} pts)** - Membros: ${item.membros}</li>`).join('')}</ol>
-            <h3>Melhores Alvos de Farm</h3>
-            <ol>${melhoresFarms.map(item => `<li>**${item.tipo} (${item.pontos} pts)** - ${item.coords}</li>`).join('')}</ol>
+        const userX = parseInt(coordsParts[0], 10);
+        const userY = parseInt(coordsParts[1], 10);
+
+        const nearbyVillages = playerVillages.map(village => {
+            const distance = calculateDistance(userX, userY, village.x, village.y);
+            return { ...village, distance: distance };
+        }).filter(village => village.distance <= radius);
+
+        nearbyVillages.sort((a, b) => a.distance - b.distance);
+
+        displayRadiusVillages(nearbyVillages);
+    });
+
+    function calculateDistance(x1, y1, x2, y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    function displayRadiusVillages(villageList) {
+        const tableBody = document.getElementById('radiusTableBody');
+        tableBody.innerHTML = '';
+        document.getElementById('attack-analysis-container').innerHTML = '';
+
+        if (villageList.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5">Nenhuma aldeia encontrada no raio especificado.</td></tr>`;
+            return;
+        }
+
+        villageList.forEach(village => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${village.name}</td>
+                <td>${village.coords}</td>
+                <td>${village.points}</td>
+                <td>${village.distance.toFixed(2)}</td>
+                <td><button class="analysis-btn" data-points="${village.points}">Analisar</button></td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        document.querySelectorAll('.analysis-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const points = parseInt(this.dataset.points, 10);
+                displayAttackAnalysis(points);
+            });
+        });
+    }
+
+    function displayAttackAnalysis(points) {
+        let difficulty, farmEstimate, troopSuggestion, strategyTip;
+        
+        if (points < 1000) {
+            difficulty = "Muito Fácil";
+            farmEstimate = "Provavelmente vazia, ideal para farm rápido.";
+            troopSuggestion = "10 lanceiros ou 5 espadachins";
+            strategyTip = "Ótima opção para farmar recursos rapidamente e acumular pontos.";
+        } else if (points >= 1000 && points < 3000) {
+            difficulty = "Fácil";
+            farmEstimate = "Pode conter recursos. Ataque regular é a melhor opção.";
+            troopSuggestion = "20 a 50 lanceiros ou 10 a 25 espadachins";
+            strategyTip = "Boa opção para farm. Se o jogador for inativo, vale a pena atacar com mais tropas.";
+        } else if (points >= 3000 && points < 5000) {
+            difficulty = "Médio";
+            farmEstimate = "Pode ter uma defesa pequena. Use tropas mais fortes ou mais quantidade.";
+            troopSuggestion = "50 a 100 lanceiros e 50 espadachins. Pode precisar de Cavalaria Leve.";
+            strategyTip = "Considere um ataque de exploração antes para verificar a defesa. Ataques de farm compensam.";
+        } else if (points >= 5000 && points < 8000) {
+            difficulty = "Difícil";
+            farmEstimate = "Provável que tenha uma defesa moderada. Ataque com cavalaria.";
+            troopSuggestion = "Use Cavalaria Leve. Quantidade varia com a distância.";
+            strategyTip = "Alvo para farm de longo prazo ou para noblar. Considere um ataque de cerco.";
+        } else { // pontos >= 8000
+            difficulty = "Muito Difícil";
+            farmEstimate = "Possível que a defesa seja forte. Ataque com tropas de nobre e apoio.";
+            troopSuggestion = "Nobres, Aríetes, Catapultas e tropas de apoio (machadeiros/cavalaria)";
+            strategyTip = "Alvo de noblagem. Requer um plano de ataque coordenado e tropas full.";
+        }
+
+        const analysisHTML = `
+            <h3>Análise do Alvo</h3>
+            <p><strong>Dificuldade:</strong> ${difficulty}</p>
+            <p><strong>Farm Provável:</strong> ${farmEstimate}</p>
+            <p><strong>Sugestão de Tropas:</strong> ${troopSuggestion}</p>
+            <p><strong>Estratégia Recomendada:</strong> ${strategyTip}</p>
         `;
 
-        resultadosDiv.innerHTML = resultadosHtml;
-        localStorage.setItem(`analiseResultados`, resultadosHtml);
+        document.getElementById('attack-analysis-container').innerHTML = analysisHTML;
     }
 
-    // PLANO DE ATAQUE
-    function gerarPlanoAtaque() {
-        const mundo = document.getElementById('planoWorldSelect').value;
-        const villageData = localStorage.getItem('analiseData_village');
-        const playerData = localStorage.getItem('analiseData_player');
-        const allyData = localStorage.getItem('analiseData_ally');
-        const minhaCoordStr = document.getElementById('minhaCoordPlano').value;
-        const planoAtaqueDiv = document.getElementById('planoAtaqueResult');
-
-        if (!villageData || !playerData || !allyData || !minhaCoordStr) {
-            alert("Por favor, visite as páginas de classificação de Aldeias, Jogadores e Tribos no jogo para coletar os dados primeiro.");
+    document.getElementById('analyzeStrategyButton').addEventListener('click', function() {
+        if (playerVillages.length === 0 || barbarianVillages.length === 0 || bonusVillages.length === 0) {
+            alert('Atenção: A lista de aldeias está vazia. Por favor, cole os dados na aba "Análise" e clique em "Gerar Relatório" primeiro.');
             return;
         }
 
-        const minhaCoord = minhaCoordStr.split("|").map(Number);
-        if (minhaCoord.length !== 2 || isNaN(minhaCoord[0]) || isNaN(minhaCoord[1])) {
-            alert("Coordenada inválida! Use o formato: 500|500");
+        const userCoordsInput = document.getElementById('userVillageCoords').value;
+        const coordsParts = userCoordsInput.split('|');
+        if (coordsParts.length !== 2 || isNaN(parseInt(coordsParts[0], 10)) || isNaN(parseInt(coordsParts[1], 10))) {
+            alert('Erro: Por favor, insira as coordenadas no formato X|Y. Ex: 500|500');
             return;
         }
 
-        const aldeias = JSON.parse(villageData);
-        const jogadores = JSON.parse(playerData);
-        const tribos = JSON.parse(allyData);
-
-        const alvos = Object.values(aldeias).filter(a => a.jogadorID > 0 || a.jogadorID === 0);
+        const userX = parseInt(coordsParts[0], 10);
+        const userY = parseInt(coordsParts[1], 10);
         
-        alvos.forEach(aldeia => {
-            const distancia = Math.sqrt(Math.pow(minhaCoord[0] - aldeia.x, 2) + Math.pow(minhaCoord[1] - aldeia.y, 2));
-            aldeia.distancia = distancia;
-            aldeia.jogador = jogadores[aldeia.jogadorID];
-            if (aldeia.jogador && aldeia.jogador.allyID) {
-                aldeia.tribo = tribos[aldeia.jogador.allyID];
+        nearbyVillagesAll = [...playerVillages, ...barbarianVillages, ...bonusVillages].map(village => {
+            const distance = calculateDistance(userX, userY, village.x, village.y);
+            return { ...village, distance: distance };
+        });
+
+        nearbyVillagesAll.sort((a, b) => a.distance - b.distance);
+        
+        displayStrategyVillages(nearbyVillagesAll.slice(0, 20));
+        
+        document.getElementById('strategy-tabs').style.display = 'flex';
+        document.getElementById('strategy-tab-all').classList.add('active');
+        document.getElementById('strategy-tab-player').classList.remove('active');
+        document.getElementById('strategy-tab-barbarian').classList.remove('active');
+        document.getElementById('strategy-tab-bonus').classList.remove('active');
+    });
+
+    document.getElementById('strategy-tabs').addEventListener('click', function(event) {
+        if (event.target.tagName === 'BUTTON') {
+            document.querySelectorAll('#strategy-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            let filteredList = [];
+            const filterType = event.target.id;
+
+            if (filterType === 'strategy-tab-player') {
+                filteredList = nearbyVillagesAll.filter(v => v.playerId !== 0).slice(0, 20);
+            } else if (filterType === 'strategy-tab-barbarian') {
+                filteredList = nearbyVillagesAll.filter(v => v.playerId === 0 && !v.name.includes('Aldeia-bonus')).slice(0, 20);
+            } else if (filterType === 'strategy-tab-bonus') {
+                filteredList = nearbyVillagesAll.filter(v => v.name.includes('Aldeia-bonus')).slice(0, 20);
+            } else {
+                filteredList = nearbyVillagesAll.slice(0, 20);
             }
-        });
+            displayStrategyVillages(filteredList);
+        }
+    });
 
-        const alvosProximos = alvos.sort((a, b) => a.distancia - b.distancia).slice(0, 50);
-
-        let htmlResult = "<h3>Plano de Ataque (50 Alvos mais Próximos)</h3>";
-        htmlResult += "<p>Sugestões baseadas na distância e pontuação. Sempre espião antes de atacar!</p>";
-        
-        alvosProximos.forEach(alvo => {
-            const recursosEstimados = Math.floor(alvo.pontos * 1.2);
-            let qtdLeve = Math.ceil(recursosEstimados / tropas.leve.carga);
-            if (qtdLeve < 5) qtdLeve = 5;
-
-            const nomeJogador = alvo.jogador ? alvo.jogador.nome : "Bárbara/Bônus";
-            const nomeTribo = alvo.tribo ? alvo.tribo.nome : "N/A";
-
-            htmlResult += `
-                <div>
-                    ${alvo.x}|${alvo.y} | 
-                    ${alvo.nome} (${alvo.pontos} pts) | 
-                    ${nomeJogador} | 
-                    ${nomeTribo} | 
-                    ${qtdLeve} Cavalaria Leve | 
-                    ${alvo.distancia.toFixed(2)} campos
-                </div>
+    function displayStrategyVillages(villageList) {
+        const tableBody = document.getElementById('strategyTableBody');
+        tableBody.innerHTML = '';
+        if (villageList.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4">Nenhuma aldeia encontrada para este filtro.</td></tr>`;
+            return;
+        }
+        villageList.forEach(village => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${village.name}</td>
+                <td>${village.coords}</td>
+                <td>${village.points}</td>
+                <td>${village.distance.toFixed(2)}</td>
             `;
+            tableBody.appendChild(row);
         });
+    }
+
+    // Lógica da Calculadora de Viagem
+    document.getElementById('calculateTimeButton').addEventListener('click', function() {
+        const originCoordsInput = document.getElementById('originCoords').value;
+        const destinyCoordsInput = document.getElementById('destinyCoords').value;
+        const troopType = document.getElementById('troopType').value;
         
-        planoAtaqueDiv.innerHTML = htmlResult;
-        localStorage.setItem(`planoAtaqueResult-${mundo}`, htmlResult);
-    }
-    
-    // Funções de análise de dados
-    function getTopVillages(aldeias, jogadores) {
-      const lista = Object.values(aldeias).filter(a => a.jogadorID > 0).sort((a, b) => b.pontos - a.pontos).slice(0, 50);
-      return lista.map(aldeia => ({
-        nome: aldeia.nome,
-        pontos: aldeia.pontos,
-        coords: `${aldeia.x}|${aldeia.y}`,
-        jogador: jogadores[aldeia.jogadorID] ? jogadores[aldeia.jogadorID].nome : 'Desconhecido'
-      }));
-    }
+        const originParts = originCoordsInput.split('|');
+        const destinyParts = destinyCoordsInput.split('|');
 
-    function getTopTribes(tribos) {
-        let tribosComPontos = Object.values(tribos).map(tribo => {
-            let totalPontos = 0;
-            return {
-                ...tribo,
-                pontos: tribo.pontos
-            };
-        });
+        if (originParts.length !== 2 || destinyParts.length !== 2 || isNaN(parseInt(originParts[0], 10)) || isNaN(parseInt(originParts[1], 10)) || isNaN(parseInt(destinyParts[0], 10)) || isNaN(parseInt(destinyParts[1], 10))) {
+            alert('Erro: Por favor, insira as coordenadas de origem e destino no formato X|Y.');
+            return;
+        }
         
-        return tribosComPontos.sort((a, b) => b.pontos - a.pontos).slice(0, 50);
-    }
+        const x1 = parseInt(originParts[0], 10);
+        const y1 = parseInt(originParts[1], 10);
+        const x2 = parseInt(destinyParts[0], 10);
+        const y2 = parseInt(destinyParts[1], 10);
 
+        const distance = calculateDistance(x1, y1, x2, y2);
+        const troopSpeed = troopSpeeds[troopType];
+        
+        const worldSpeed = 1; // Pode ser ajustado se o mundo tiver velocidade diferente
+        const totalTimeInMinutes = (distance * troopSpeed) / worldSpeed;
+        const totalTimeInSeconds = totalTimeInMinutes * 60;
 
-    function getBestFarms(aldeias) {
-      const farms = Object.values(aldeias).filter(a => a.jogadorID === 0).sort((a, b) => b.pontos - a.pontos).slice(0, 50);
-      return farms.map(aldeia => ({
-        tipo: 'Bárbara',
-        pontos: aldeia.pontos,
-        coords: `${aldeia.x}|${aldeia.y}`
-      }));
+        const hours = Math.floor(totalTimeInSeconds / 3600);
+        const minutes = Math.floor((totalTimeInSeconds % 3600) / 60);
+        const seconds = Math.floor(totalTimeInSeconds % 60);
+
+        const timeOutput = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        document.getElementById('timeOutput').textContent = timeOutput;
+        document.getElementById('travelTimeResult').style.display = 'block';
+    });
+
+    // Lógica do Planejador de Ataque
+    document.getElementById('planAttackButton').addEventListener('click', function() {
+        const originCoordsInput = document.getElementById('attackOriginCoords').value;
+        const destinyCoordsInput = document.getElementById('attackDestinyCoords').value;
+        const arrivalTimeInput = document.getElementById('arrivalTime').value;
+
+        if (!originCoordsInput || !destinyCoordsInput || !arrivalTimeInput) {
+            alert('Erro: Por favor, preencha todas as coordenadas e o horário de chegada.');
+            return;
+        }
+        
+        const originParts = originCoordsInput.split('|');
+        const destinyParts = destinyCoordsInput.split('|');
+
+        if (originParts.length !== 2 || destinyParts.length !== 2) {
+            alert('Erro: Por favor, insira as coordenadas no formato X|Y.');
+            return;
+        }
+
+        const x1 = parseInt(originParts[0], 10);
+        const y1 = parseInt(originParts[1], 10);
+        const x2 = parseInt(destinyParts[0], 10);
+        const y2 = parseInt(destinyParts[1], 10);
+
+        const distance = calculateDistance(x1, y1, x2, y2);
+        const arrivalTime = new Date(arrivalTimeInput);
+        
+        if (isNaN(arrivalTime.getTime())) {
+            alert('Erro: Horário de chegada inválido. Use o formato do campo.');
+            return;
+        }
+
+        const worldSpeed = 1;
+        let outputHTML = '';
+
+        for (const [troop, speed] of Object.entries(troopSpeeds)) {
+            const travelTimeInMinutes = (distance * speed) / worldSpeed;
+            const travelTimeInMilliseconds = travelTimeInMinutes * 60 * 1000;
+            
+            const departureTime = new Date(arrivalTime.getTime() - travelTimeInMilliseconds);
+            
+            const formattedTime = departureTime.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' - ' +
+                                  departureTime.toLocaleTimeString('pt-BR', { hour12: false });
+            
+            const troopName = getTroopName(troop);
+            outputHTML += `<p><span>${troopName}:</span> ${formattedTime}</p>`;
+        }
+
+        document.getElementById('departureTimesOutput').innerHTML = outputHTML;
+        document.getElementById('attackPlannerResult').style.display = 'block';
+    });
+
+    function getTroopName(key) {
+        const names = {
+            spear: 'Lanceiro',
+            sword: 'Espadachim',
+            axe: 'Machadeiro',
+            archer: 'Arqueiro',
+            scout: 'Explorador',
+            light: 'Cavalaria Leve',
+            marcher: 'Arqueiro a Cavalo',
+            heavy: 'Cavalaria Pesada',
+            ram: 'Aríete',
+            catapult: 'Catapulta',
+            snob: 'Nobre'
+        };
+        return names[key] || key;
     }
-    
-    window.onload = () => {
-        updateDataStatus();
-    };
-  </script>
+</script>
+
 </body>
 </html>
